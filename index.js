@@ -12,6 +12,15 @@ const Category = require('./controller/models/Category')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+//Add headers before the routes are defined
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+})
+
 connection
     .authenticate()
     .then(() => console.log('Connect to DB'))
@@ -22,7 +31,7 @@ app.use('/', categoriesController)
 app.use('/', articlesController)
 
 app.get('/', (req, res) => {
-    res.json({ sadasdsa: 'Positivo' })
+
 })
 
 app.listen(3030, () => console.log('Server running'))
