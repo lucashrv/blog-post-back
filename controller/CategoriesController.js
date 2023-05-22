@@ -11,12 +11,12 @@ router.get('/admin/categories', (req, res) => {
             ],
             raw: true
         })
-        .then(category => res.send(category))
-        .catch(err => res.send(err))
+        .then(response => res.json(response))
+        .catch(err => res.json(err))
 })
 
 router.post('/admin/categories/new', (req, res) => {
-    const title = req.body.title
+    const { title } = req.body
 
     if(title){
 
@@ -25,13 +25,41 @@ router.post('/admin/categories/new', (req, res) => {
                 title: title,
                 slug: slugify(title.toLowerCase())
             })
-            .then(() => {
-                res.send('Categoria criada com sucesso!')
-            })
+            .then(response => res.json(response))
+            .catch(err => res.json(err))
 
     } else {
         res.json({ error: "'title' is required!" })
     }
+})
+
+router.get('/admin/categories/edit/:id', (req, res) => {
+    const { id } = req.params
+
+    Category
+        .findByPk(id)
+        .then(category => {
+            if (category != undefined && !isNaN(id)) {
+                res.json(category)
+            } else {
+                res.json('Categoria com id não encontrado!')
+            }
+        })
+        .catch(err => res.send(err))
+})
+
+router.put('/admin/categories/update', (req, res) => {
+    const { id, title } = req.body
+
+    Category.update(
+        {
+            title,
+            slug: slugify(title.toLowerCase())
+        },
+        { where: { id } }
+    )
+        .then(response => res.status(200).json(response))
+        .catch(err => res.json(err))
 })
 
 router.delete('/admin/categories/delete/:id', (req, res) => {
