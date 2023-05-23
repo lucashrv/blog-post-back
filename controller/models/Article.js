@@ -22,4 +22,4 @@ Article.belongsTo(Category)
 
 // Article.sync({ force: false })
 
-module.exports = Category
+module.exports = Article

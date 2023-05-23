@@ -70,7 +70,7 @@ router.delete('/admin/categories/delete/:id', (req, res) => {
             where: { id }
         })
             .then(() => res.json(`Categoria com id ${id} deletado com sucesso`))
-            .catch(err => res.json(`Ocorreu um erro: ${err}`))
+            .catch(err => res.json(err))
     }
 })
 
