@@ -35,7 +35,13 @@ app.use('/', categoriesController)
 app.use('/', articlesController)
 
 app.get('/', (req, res) => {
-
+    Article
+        .findAll({
+            order: [["id", 'DESC']],
+            raw: true
+        })
+        .then(response => res.json(response))
+        .catch(err => res.json(err))
 })
 
 app.listen(8000, () => console.log('Server running'))

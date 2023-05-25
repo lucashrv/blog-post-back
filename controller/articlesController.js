@@ -1,11 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const Article = require('./models/Article')
+const Category = require('./models/Category')
 const slugify = require('slugify')
 
 router.get('/admin/articles', (req, res) => {
     Article
-        .findAll()
+        .findAll({
+            include:[{ model: Category }]
+        })
         .then(response => res.json(response))
         .catch(err => res.json(err))
 })
@@ -20,6 +23,53 @@ router.get('/admin/articles/edit/:id', (req, res) => {
             } else {
                 res.json('Artigo com id não encontrado!')
             }
+        })
+        .catch(err => res.json(err))
+})
+
+router.get('/articles/GetArticlesByCategory/:id', (req, res) => {
+    const { id } = req.params
+
+    Category
+        .findOne({
+            where: { id },
+            include: [{ model: Article }]
+        })
+        .then(response => res.json(response))
+        .catch(err => res.json(err))
+})
+
+router.get('/articles/pagination/:page', (req,res) => {
+    const { page } = req.params
+    let offset = 0
+
+    if (isNaN(page) || page == 1){
+        offset = 0
+    } else {
+        offset = parseInt(page) * 4 - 4
+    }
+
+    Article
+        .findAndCountAll({
+            limit: 4,
+            offset: offset,
+            order: [[ 'id', 'DESC' ]]
+        })
+        .then(response => {
+            let next
+
+            if(offset + 4 >= response.count){
+                next = false
+            } else {
+                next = true
+            }
+
+            const result = {
+                next,
+                data: response
+            }
+
+            res.json(result)
         })
         .catch(err => res.json(err))
 })
