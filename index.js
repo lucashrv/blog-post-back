@@ -10,10 +10,12 @@ app.use(bodyParser.json())
 //Controllers
 const categoriesController = require('./controller/CategoriesController')
 const articlesController = require('./controller/ArticlesController')
+const usersController = require('./controller/UsersController')
 
 //Models
 const Article = require('./controller/models/Article')
 const Category = require('./controller/models/Category')
+const User = require('./controller/models/User')
 
 //Add headers before the routes are defined
 app.use((req, res, next) => {
@@ -33,6 +35,8 @@ connection
 app.use('/', categoriesController)
 
 app.use('/', articlesController)
+
+app.use('', usersController)
 
 app.get('/', (req, res) => {
     Article
