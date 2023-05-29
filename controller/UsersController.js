@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const adminAuth = require('../middlewares/adminAuth')
 
 const User = require('./models/User')
 
@@ -27,14 +28,17 @@ const checkToken = (req, res, next) => {
 
 router.get('/admin/user', (req, res) => {
     User
-        .findAll()
+        .findAll({
+            raw: true,
+            attributes: { exclude: [ 'password' ] }
+        })
         .then(response => res.json(response))
         .catch(err => res.json(err))
 })
 
 // private route
 
-router.get('/admin/user/:id', checkToken, async (req, res) => {
+router.get('/admin/user/:id', adminAuth, async (req, res) => {
     const { id } = req.params
 
     const user =
@@ -110,7 +114,7 @@ router.post('/user/register', async (req, res) => {
     }
 })
 
-// Login user - public route
+// Login User get token - public route
 
 router.post('/user/login', async(req, res) => {
     const { userName, password } = req.body
@@ -119,7 +123,10 @@ router.post('/user/login', async(req, res) => {
 
     if (!password) return res.status(422).json({ msg: 'A senha é obrigatória' })
 
-    const user = await User.findOne({ where: { userName } })
+    const user = await User.findOne({
+        where: { userName },
+        raw: true
+    })
 
     if (!user) {
         return res.status(404).send({ msg: 'Usuário não encontrado' })
@@ -132,18 +139,37 @@ router.post('/user/login', async(req, res) => {
     }
 
     try {
+        // req.session.user = {
+        //     id: user.id,
+        //     userName: user.email
+        // }
 
-        const secret = process.env.SECRET
-
-        const token = jwt.sign({ id: user._id }, secret)
-
-        res.status(200).json({ msg: 'Autenticação realizada com sucesso', token })
+        res.status(200).json({ ...user })
 
     } catch (err) {
         console.log(err)
 
         res.status(500).json({ msg: 'Ocorreu um erro' })
     }
+
+
+    // try {
+
+    //     const secret = process.env.SECRET
+
+    //     const token = jwt.sign({ id: user._id }, secret)
+
+    //     res.status(200).json({ msg: 'Autenticação realizada com sucesso', token })
+
+    // } catch (err) {
+    //     console.log(err)
+
+    //     res.status(500).json({ msg: 'Ocorreu um erro' })
+    // }
+})
+
+router.get('/user/logout', async(req, res) => {
+    req.session.user = undefined
 })
 
 module.exports = router

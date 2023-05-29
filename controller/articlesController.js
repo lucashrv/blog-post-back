@@ -3,8 +3,9 @@ const router = express.Router()
 const Article = require('./models/Article')
 const Category = require('./models/Category')
 const slugify = require('slugify')
+const adminAuth = require('../middlewares/adminAuth')
 
-router.get('/admin/articles', (req, res) => {
+router.get('/admin/articles', adminAuth, (req, res) => {
     Article
         .findAll({
             include:[{ model: Category }]
@@ -13,7 +14,7 @@ router.get('/admin/articles', (req, res) => {
         .catch(err => res.json(err))
 })
 
-router.get('/admin/articles/edit/:id', (req, res) => {
+router.get('/admin/articles/edit/:id', adminAuth, (req, res) => {
     const { id } = req.params
 
     Article.findByPk(id)
@@ -74,7 +75,7 @@ router.get('/articles/pagination/:page', (req,res) => {
         .catch(err => res.json(err))
 })
 
-router.post('/admin/articles/new', (req, res) => {
+router.post('/admin/articles/new', adminAuth, (req, res) => {
     const { title, body, categoryId } = req.body
 
     if (!title) {
@@ -100,7 +101,7 @@ router.post('/admin/articles/new', (req, res) => {
         .catch(err => res.json(err))
 })
 
-router.put('/admin/articles/update', (req, res) => {
+router.put('/admin/articles/update', adminAuth, (req, res) => {
     const { id, title, body, categoryId } = req.body
 
     Article.update(
@@ -117,7 +118,7 @@ router.put('/admin/articles/update', (req, res) => {
         .catch(err => res.json(err))
 })
 
-router.delete('/admin/articles/delete/:id', (req, res) => {
+router.delete('/admin/articles/delete/:id', adminAuth, (req, res) => {
     const { id } = req.params
 
     if (id != undefined && !isNaN(id)) {

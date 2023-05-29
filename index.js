@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const connection = require('./database/database')
+const session = require('express-session')
 
 //BodyParser
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -16,6 +17,12 @@ const usersController = require('./controller/UsersController')
 const Article = require('./controller/models/Article')
 const Category = require('./controller/models/Category')
 const User = require('./controller/models/User')
+
+//Session
+app.use(session({
+    secret: process.env.SECRET_SESSION,
+    cookie: { maxAge: 30000000 }
+  }))
 
 //Add headers before the routes are defined
 app.use((req, res, next) => {

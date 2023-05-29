@@ -2,8 +2,10 @@ const express = require('express')
 const router = express.Router()
 const slugify = require('slugify')
 const Category = require('./models/Category')
+const Article = require('./models/Article')
+const adminAuth = require('../middlewares/adminAuth')
 
-router.get('/admin/categories', (req, res) => {
+router.get('/admin/categories', adminAuth, (req, res) => {
     Category
         .findAll({
             order: [
@@ -15,7 +17,7 @@ router.get('/admin/categories', (req, res) => {
         .catch(err => res.json(err))
 })
 
-router.post('/admin/categories/new', (req, res) => {
+router.post('/admin/categories/new', adminAuth, (req, res) => {
     const { title } = req.body
 
     if(title){
@@ -33,7 +35,7 @@ router.post('/admin/categories/new', (req, res) => {
     }
 })
 
-router.get('/admin/categories/edit/:id', (req, res) => {
+router.get('/admin/categories/edit/:id', adminAuth, (req, res) => {
     const { id } = req.params
 
     Category
@@ -48,7 +50,7 @@ router.get('/admin/categories/edit/:id', (req, res) => {
         .catch(err => res.send(err))
 })
 
-router.put('/admin/categories/update', (req, res) => {
+router.put('/admin/categories/update', adminAuth, (req, res) => {
     const { id, title } = req.body
 
     Category.update(
@@ -62,8 +64,15 @@ router.put('/admin/categories/update', (req, res) => {
         .catch(err => res.json(err))
 })
 
-router.delete('/admin/categories/delete/:id', (req, res) => {
+router.delete('/admin/categories/delete/:id', adminAuth, (req, res) => {
     const { id } = req.params
+
+    const isArticleCategory =
+        Article.findOne({
+            where: { categoryId: id }
+        })
+
+    if(isArticleCategory) return res.status(422).json({ msg: 'Há artigos cadastrados nessa categoria' })
 
     if (id != undefined && !isNaN(id)) {
         Category.destroy({
